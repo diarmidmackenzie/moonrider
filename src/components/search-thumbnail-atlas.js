@@ -1,6 +1,6 @@
 import utils from '../utils';
 
-var CANVAS_HEIGHT = 512;  // Power-of-two.
+var CANVAS_HEIGHT = 512; // Power-of-two.
 var HEIGHT = 64;
 var NUM_PER_PAGE = 6;
 var WIDTH = 64;
@@ -16,14 +16,14 @@ AFRAME.registerComponent('search-thumbnail-atlas', {
   dependencies: ['geometry', 'material'],
 
   schema: {
-    dummyUpdater: {type: 'string'}
+    dummyUpdater: { type: 'string' }
   },
 
   init: function () {
     // Create canvas for texture atlas.
     const canvas = this.canvas = document.createElement('canvas');
     canvas.setAttribute('id', 'thumbnailAtlasMap');
-    canvas.height = CANVAS_HEIGHT;  // Power-of-two.
+    canvas.height = CANVAS_HEIGHT; // Power-of-two.
     canvas.width = WIDTH;
     canvas.style.visibility = 'hidden';
     this.ctx = canvas.getContext('2d');
@@ -53,7 +53,7 @@ AFRAME.registerComponent('search-thumbnail-atlas', {
     for (let i = 0; i < results.length; i++) {
       let img = this.images[i] = this.images[i] || document.createElement('img');
       img.crossOrigin = 'anonymous';
-      img.src = utils.getS3FileUrl(results[i].id, 'image.jpg');
+      img.src = results[i].coverURL;
       if (img.complete) {
         this.draw(img, i);
       } else {
