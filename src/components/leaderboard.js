@@ -5,6 +5,8 @@ require('firebase/firestore');
 const NUM_SCORES_DISPLAYED = 10;
 const ba = /(fuc)|(ass)|(nig)|(shit)|(retard)/gi;
 
+// TODO! Support beatmapCharacteristic in here
+
 /**
  * High score with Firebase cloud store.
  * Index: challengeId ASC difficulty ASC score DESC time ASC
@@ -20,6 +22,7 @@ AFRAME.registerComponent('leaderboard', {
 
     challengeId: {default: ''},
     difficulty: {default: ''},
+    beatmapCharacteristic: { default: '' },
     inVR: {default: false},
     gameMode: {type: 'string'},
     menuSelectedChallengeId: {default: ''},
@@ -66,7 +69,7 @@ AFRAME.registerComponent('leaderboard', {
     }
 
     if (this.data.menuSelectedChallengeId &&
-        oldData.menuSelectedChallengeId !== this.data.menuSelectedChallengeId) {
+      oldData.menuSelectedChallengeId !== this.data.menuSelectedChallengeId) {
       this.fetchScores(this.data.menuSelectedChallengeId);
       return;
     }
@@ -93,7 +96,7 @@ AFRAME.registerComponent('leaderboard', {
     };
 
     if (!pr.includes(this.username.toLowerCase()) &&
-        !this.username.match(ba)) {
+      !this.username.match(ba)) {
       this.db.add(scoreData);
     }
 

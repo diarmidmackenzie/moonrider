@@ -1,8 +1,10 @@
 AFRAME.registerComponent('zip-loader', {
   schema: {
-    difficulties: {type: 'array'},
-    isLoading: {default: 'false'},
-    version: {type: 'string'}  // e.g., 811-535.
+    difficulties: { type: 'array' },
+    isLoading: { default: 'false' },
+    version: { type: 'string' },
+    directDownload: { type: 'string' },
+    bpm: { type: 'number' }
   },
 
   init: function () {
@@ -23,11 +25,14 @@ AFRAME.registerComponent('zip-loader', {
 
     // Abort previous ZIP request if new song selected.
     if (oldData.version && oldData.version !== data.version &&
-        this.cachedVersion !== data.version) {
+      this.cachedVersion !== data.version) {
       this.message.abort = true;
       this.message.difficulties = JSON.stringify(this.data.difficulties);
       this.message.version = oldData.version;
-      this.worker.postMessage(this.message);  // Start the worker.
+      this.message.directDownload = this.data.directDownload;
+      this.message.bpm = this.data.bpm;
+      this.message.hash = this.data.hash;
+      this.worker.postMessage(this.message); // Start the worker.
     }
 
     if (data.version && oldData.version !== data.version) {
@@ -38,29 +43,22 @@ AFRAME.registerComponent('zip-loader', {
 
     // Faulty ZIP.
     if (!oldData.isLoading && this.data.isLoading &&
-        this.cachedVersion === this.data.version &&
-        !this.cachedZip) {
+      this.cachedVersion === this.data.version &&
+      !this.cachedZip) {
       this.el.emit('songloaderror');
     }
   },
 
   fetchZip: function (version) {
     this.el.emit('ziploaderstart', null, false);
-    if (this.cachedVersion === version) {
-      // Faulty ZIP.
-      if (!this.cachedZip) {
-        this.el.emit('songloaderror');
-        return;
-      }
-
-      this.el.emit('ziploaderend', this.cachedZip, false);
-      return;
-    }
 
     this.message.abort = false;
     this.message.difficulties = JSON.stringify(this.data.difficulties);
     this.message.version = version;
-    this.worker.postMessage(this.message);  // Start the worker.
+    this.message.directDownload = this.data.directDownload;
+    this.message.bpm = this.data.bpm;
+    this.message.hash = this.data.hash;
+    this.worker.postMessage(this.message); // Start the worker.
   },
 
   onMessage: function (evt) {
@@ -69,13 +67,11 @@ AFRAME.registerComponent('zip-loader', {
         this.el.emit('songloaderror');
         break;
       }
-
       case 'progress': {
         if (evt.data.version !== this.data.version) { return; }
         this.loadingIndicator.setAttribute('material', 'progress', evt.data.progress);
         break;
       }
-
       case 'load': {
         this.cachedVersion = evt.data.version;
         this.cachedZip = evt.data.data;
@@ -115,7 +111,7 @@ function jsonParseClean (str) {
     }
 
     // Remove Unicode escape sequences.
-    // stringified = stringified.replace(/\\u..../g, ' ');
+    // stringified = stringified.replace(/\\u..../g, ' ')
     return jsonParseLoop(str, 0);
   } catch (e) {
     // Should not reach here.

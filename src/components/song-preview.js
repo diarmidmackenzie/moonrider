@@ -7,8 +7,8 @@ const PREVIEW_VOLUME = 0.5;
  */
 AFRAME.registerComponent('song-preview-system', {
   schema: {
-    previewStartTime: {type: 'int'},
-    selectedChallengeId: {type: 'string'}
+    selectedChallengeId: { type: 'string' },
+    selectedChallengeVersion: { type: 'string' }
   },
 
   init: function () {
@@ -18,13 +18,15 @@ AFRAME.registerComponent('song-preview-system', {
 
   update: function (oldData) {
     const data = this.data;
-
-    this.audio.pause();
+    console.log('update-song', oldData, data);
 
     if (data.selectedChallengeId && oldData.selectedChallengeId !== data.selectedChallengeId) {
-      this.audio.setAttribute('src', utils.getS3FileUrl(data.selectedChallengeId, 'song.ogg'));
-      this.audio.currentTime = data.previewStartTime;
+      this.audio.pause();
+      this.audio.setAttribute('src', 'https://cdn.beatsaver.com/' + data.selectedChallengeVersion + '.mp3');
+      this.audio.currentTime = 0;
       this.audio.play();
+    } else if (!data.selectedChallengeId) {
+      this.audio.pause();
     }
-  },
+  }
 });
